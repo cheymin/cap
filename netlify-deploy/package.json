@@ -9,7 +9,7 @@
     "db:init": "node netlify/functions/api/_init-db.mjs"
   },
   "dependencies": {
-    "@neondatabase/serverless": "^0.10.0",
+    "@netlify/neon": "^0.1.2",
     "bcryptjs": "^2.4.3",
     "capjs-core": "^0.1.1",
     "hono": "^4.6.0"

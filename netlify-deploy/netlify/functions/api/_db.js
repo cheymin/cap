@@ -1,9 +1,10 @@
-import { neon } from "@neondatabase/serverless";
+import { neon } from "@netlify/neon";
 import { readFileSync } from "node:fs";
 import { fileURLToPath } from "node:url";
 import { dirname, join } from "node:path";
 
-const sql = neon(process.env.NETLIFY_DATABASE_URL);
+// @netlify/neon 自动读取 NETLIFY_DATABASE_URL 环境变量
+const sql = neon();
 
 let _initPromise = null;
 

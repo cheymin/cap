@@ -4,19 +4,13 @@
  *
  * 需要设置 NETLIFY_DATABASE_URL 环境变量
  */
-import { neon } from "@neondatabase/serverless";
+import { neon } from "@netlify/neon";
 import { readFileSync } from "node:fs";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 
-const dbUrl = process.env.NETLIFY_DATABASE_URL;
-if (!dbUrl) {
-  console.error("错误: NETLIFY_DATABASE_URL 环境变量未设置");
-  console.error("请在 Netlify 后台开启 Postgres 数据库后获取连接字符串");
-  process.exit(1);
-}
-
-const sql = neon(dbUrl);
+// @netlify/neon 自动读取 NETLIFY_DATABASE_URL
+const sql = neon();
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const schema = readFileSync(join(__dirname, "_schema.sql"), "utf8");
 
