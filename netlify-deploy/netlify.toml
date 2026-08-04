@@ -4,7 +4,7 @@
 
 [functions]
   node_bundler = "esbuild"
-  included_files = ["public/**/*"]
+  included_files = ["public/**/*", "netlify/functions/api/_schema.sql"]
 
 # 所有 API 请求转发到 serverless function
 [[redirects]]
