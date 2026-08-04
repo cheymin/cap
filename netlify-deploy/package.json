@@ -9,10 +9,10 @@
     "db:init": "node netlify/functions/api/_init-db.mjs"
   },
   "dependencies": {
-    "@netlify/neon": "^0.1.2",
     "bcryptjs": "^2.4.3",
     "capjs-core": "^0.1.1",
-    "hono": "^4.6.0"
+    "hono": "^4.6.0",
+    "pg": "^8.13.0"
   },
   "devDependencies": {
     "netlify-cli": "^17.0.0"

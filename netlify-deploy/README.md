@@ -19,12 +19,22 @@ netlify deploy
 
 或通过 Netlify 后台连接 Git 仓库。
 
-### 3. 开启 Netlify Postgres 数据库
+### 3. 连接 Supabase 数据库
 
 在 Netlify 后台：
-1. 进入站点 → **Integrations** → **Databases**
-2. 点击 **Enable Postgres**
-3. Netlify 会自动注入 `NETLIFY_DATABASE_URL` 环境变量
+1. 进入站点 → **Integrations** → **Supabase**
+2. 点击 **Connect**，通过 OAuth 授权连接你的 Supabase 账户
+3. 选择你的 Supabase 项目
+4. 框架选择 **Other**，前缀留空
+5. 点击 **Save**
+
+Netlify 会自动注入以下环境变量：
+- `SUPABASE_DATABASE_URL` — PostgreSQL 连接字符串（项目自动读取此变量）
+- `SUPABASE_SERVICE_ROLE_KEY`
+- `SUPABASE_ANON_KEY`
+- `SUPABASE_JWT_SECRET`
+
+> **注意**：Supabase 免费版数据库在 1 周无活动后会暂停，发起请求即可自动唤醒。
 
 ### 4. 设置环境变量
 
@@ -33,7 +43,7 @@ netlify deploy
 | 变量 | 必填 | 说明 |
 |------|------|------|
 | `ADMIN_KEY` | 是 | 管理面板登录密钥（至少 12 个字符） |
-| `NETLIFY_DATABASE_URL` | 自动 | 开启 Postgres 后自动注入 |
+| `SUPABASE_DATABASE_URL` | 自动 | 连接 Supabase 扩展后自动注入 |
 | `CORS_ORIGIN` | 否 | 允许的来源（逗号分隔，`*` 或留空允许全部） |
 | `DEMO_MODE` | 否 | 设为 `true` 开启演示模式（无需鉴权） |
 | `RSW_BITS` | 否 | RSW 密钥位数（默认 2048） |
@@ -45,7 +55,7 @@ netlify deploy
 或手动执行：
 
 ```bash
-NETLIFY_DATABASE_URL=你的连接字符串 node netlify/functions/api/_init-db.mjs
+SUPABASE_DATABASE_URL=你的连接字符串 node netlify/functions/api/_init-db.mjs
 ```
 
 ### 6. 开始使用

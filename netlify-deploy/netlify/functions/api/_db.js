@@ -1,10 +1,58 @@
-import { neon } from "@netlify/neon";
+import pg from "pg";
 import { readFileSync } from "node:fs";
 import { fileURLToPath } from "node:url";
 import { dirname, join } from "node:path";
 
-// @netlify/neon 自动读取 NETLIFY_DATABASE_URL 环境变量
-const sql = neon();
+// 让 JSONB 字段自动解析为 JS 对象（OID 3802）
+pg.types.setTypeParser(3802, (val) => (val === null ? null : JSON.parse(val)));
+// JSON 类型也解析 (OID 114)
+pg.types.setTypeParser(114, (val) => (val === null ? null : JSON.parse(val)));
+
+// Supabase 连接字符串优先，兼容 NETLIFY_DATABASE_URL 和 DATABASE_URL
+const connectionString =
+  process.env.SUPABASE_DATABASE_URL ||
+  process.env.NETLIFY_DATABASE_URL ||
+  process.env.DATABASE_URL;
+
+const pool = new pg.Pool({
+  connectionString,
+  max: 10,
+  idleTimeoutMillis: 20_000,
+  connectionTimeoutMillis: 10_000,
+  ssl: { rejectUnauthorized: false },
+});
+
+/**
+ * 兼容 neon() tagged template 的查询封装器
+ *
+ * 用法 1 (tagged template):  await sql`SELECT * FROM keys WHERE site_key = ${key}`
+ * 用法 2 (普通调用):          await sql('SELECT * FROM keys WHERE site_key = $1', [key])
+ *
+ * 两种方式都返回 rows 数组
+ */
+function sql(parts, ...values) {
+  // tagged template
+  if (Array.isArray(parts)) {
+    let query = "";
+    const params = [];
+    for (let i = 0; i < parts.length; i++) {
+      query += parts[i];
+      if (i < values.length) {
+        params.push(values[i]);
+        query += `$${i + 1}`;
+      }
+    }
+    return pool.query(query, params).then((r) => r.rows);
+  }
+  // 普通函数调用: sql(queryString, paramsArray)
+  // 无参数时走 simple query protocol（支持多语句，用于 schema 初始化）
+  const queryStr = parts;
+  const params = values[0];
+  if (!params || params.length === 0) {
+    return pool.query(queryStr).then((r) => r.rows);
+  }
+  return pool.query(queryStr, params).then((r) => r.rows);
+}
 
 let _initPromise = null;
 
