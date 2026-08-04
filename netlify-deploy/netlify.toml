@@ -1,0 +1,20 @@
+[build]
+  publish = "public"
+  functions = "netlify/functions"
+
+[functions]
+  node_bundler = "esbuild"
+  included_files = ["public/**/*"]
+
+# 所有 API 请求转发到 serverless function
+[[redirects]]
+  from = "/api/*"
+  to = "/.netlify/functions/api/:splat"
+  status = 200
+  force = true
+
+# 前端页面路由
+[[redirects]]
+  from = "/*"
+  to = "/index.html"
+  status = 200
