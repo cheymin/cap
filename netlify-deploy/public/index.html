@@ -3,47 +3,245 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <link rel="icon" href="/logo-small.webp" />
     <title>Cap</title>
-    <link rel="stylesheet" href="/assets/style.css" />
+    <link rel="icon" href="/logo-small.webp" />
+    <style>
+      * {
+        box-sizing: border-box;
+        font-family:
+          "IBM Plex Sans",
+          system-ui,
+          -apple-system,
+          sans-serif;
+        margin: 0;
+        padding: 0;
+      }
+
+      :root {
+        --bg: #0d1016;
+        --surface: #0e1015;
+        --border: #1f2127;
+        --text: #fafafa;
+        --text-secondary: #a0a0a8;
+        --text-muted: #5c6773;
+        --blue: #89b4fa;
+      }
+
+      a {
+        text-underline-offset: 2px;
+      }
+
+      body {
+        background-color: var(--bg);
+        color: var(--text);
+        min-height: 100vh;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        -webkit-font-smoothing: antialiased;
+      }
+
+      .login-container {
+        width: 100%;
+        margin: 0 auto;
+        max-width: 446px;
+        padding: 40px;
+        align-items: center;
+        display: flex;
+        flex-direction: column;
+        gap: 12px;
+      }
+
+      .info-side h1 {
+        font-size: 22px;
+        font-weight: 600;
+        margin-bottom: 12px;
+      }
+
+      .info-side p {
+        font-size: 14px;
+        color: var(--text-secondary);
+        line-height: 1.7;
+      }
+
+      .info-side a {
+        color: var(--text);
+        text-decoration: underline;
+        font-size: inherit;
+      }
+
+      .info-side a:hover {
+        color: var(--blue);
+      }
+
+      form {
+        display: flex;
+        flex-direction: column;
+        width: 100%;
+      }
+
+      label {
+        font-size: 13px;
+        font-weight: 500;
+        display: block;
+        margin-bottom: 8px;
+        color: var(--text-secondary);
+        user-select: none;
+      }
+
+      .password-wrapper {
+        border: 1px solid var(--border);
+        color: #eee;
+        display: flex;
+        border-radius: 8px;
+        margin-bottom: 16px;
+      }
+
+      .showhide-password {
+        border: none;
+        cursor: pointer;
+        background-color: transparent;
+        padding: 0;
+        margin-right: 10px;
+        color: var(--text-muted);
+      }
+
+      .password {
+        font-size: 24px;
+        line-height: 1.33;
+        background-color: transparent;
+        border: none;
+        width: 100%;
+        padding: 12px;
+        height: 40px;
+        color: inherit;
+        font-weight: 400;
+        caret-color: var(--blue);
+      }
+
+      .password.show-password {
+        letter-spacing: 0px;
+        font-size: 14px;
+      }
+
+      .password:focus {
+        outline: none;
+      }
+
+      .password::placeholder {
+        color: rgba(186, 194, 222, 0.4);
+        user-select: none;
+      }
+
+      .password-wrapper:focus-within {
+        border-color: var(--blue);
+        box-shadow: 0 0 0 1px var(--blue);
+        transition:
+          border-color 0.12s,
+          box-shadow 0.12s;
+      }
+
+      .submit {
+        padding: 6px 10px;
+        border-radius: 8px;
+        height: 40px;
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        justify-content: center;
+        font-weight: 500;
+        border: none;
+        color: black;
+        background: var(--blue);
+        user-select: none;
+        cursor: pointer;
+        font-size: 14px;
+        font-family: inherit;
+        transition: opacity 0.15s;
+      }
+
+      .submit:hover {
+        opacity: 0.88;
+      }
+
+      .submit:focus {
+        box-shadow: 0 0 0 3px rgba(137, 180, 250, 0.4);
+        outline: 0;
+      }
+
+      .submit:disabled {
+        cursor: not-allowed;
+        opacity: 0.4;
+      }
+
+      p.err {
+        background-color: rgba(137, 180, 250, 0.15);
+        color: rgb(228 238 255);
+        display: none;
+        margin-top: -10px;
+        padding: 4px;
+        padding-top: 18px;
+        padding-bottom: 8px;
+        font-size: 13px;
+        border-bottom-left-radius: 8px;
+        border-bottom-right-radius: 8px;
+        text-align: center;
+        user-select: none;
+      }
+
+      p.bottom {
+        display: flex;
+        align-items: center;
+        gap: 4px;
+        margin-top: 20px;
+      }
+
+      p.bottom .poweredby {
+        margin-left: auto;
+      }
+
+      a {
+        color: var(--text-muted);
+        font-size: 13px;
+        text-decoration: none;
+        user-select: none;
+        transition: color 0.15s;
+      }
+
+      a:hover {
+        color: var(--text-secondary);
+        text-decoration: underline;
+      }
+
+      @font-face {
+        font-family: "IBM Plex Sans";
+        src: url("/assets/ibm-plex-sans.woff2") format("woff2");
+        font-weight: 100 700;
+        font-style: normal;
+        font-display: swap;
+      }
+    </style>
   </head>
   <body>
-    <div class="app">
-      <button class="mobile-menu-btn" id="mobileMenuBtn" type="button" aria-label="Open menu" aria-expanded="false" aria-controls="appSidebar">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="20" height="20"><path d="M4 8h16M4 16h16"/></svg>
-      </button>
-      <div class="mobile-drawer-backdrop" id="mobileDrawerBackdrop" hidden></div>
-      <aside class="sidebar" id="appSidebar">
-        <div class="sidebar-search">
-          <svg
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="currentColor"
-            stroke-width="2"
-            stroke-linecap="round"
-            stroke-linejoin="round"
-          >
-            <circle cx="11" cy="11" r="8" />
-            <path d="m21 21-4.35-4.35" />
-          </svg>
-          <input type="text" id="searchInput" placeholder="Search keys..." />
-        </div>
-        <div class="keys-list" id="keysList"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" class="icon icon-tabler icons-tabler-outline icon-tabler-loader-2" style="margin-top: 1em;margin-bottom: 1em;"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M12 3a9 9 0 1 0 9 9" /></svg></div>
-        <div class="sidebar-footer">
-          <button class="new-key-btn" id="createKeyBtn">
+    <div class="login-container">
+      <div class="info-side">
+        <h1>The self-hosted CAPTCHA for the modern web.</h1>
+      </div>
+
+      <form action="javascript:void(0)">
+        <label>Admin key</label>
+        <div class="password-wrapper">
+          <input
+            type="password"
+            name="password"
+            placeholder="&#x2022;&#x2022;&#x2022;&#x2022;&#x2022;&#x2022;&#x2022;&#x2022;&#x2022;&#x2022;&#x2022;&#x2022;&#x2022;&#x2022;&#x2022;&#x2022;&#x2022;&#x2022;&#x2022;&#x2022;&#x2022;"
+            class="password"
+          />
+          <button title="Show/hide password" class="showhide-password" type="button">
             <svg
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              stroke-width="2"
-              stroke-linecap="round"
-            >
-              <path d="M12 5v14M5 12h14" />
-            </svg>
-            New key
-          </button>
-          <button class="settings-btn" id="settingsBtn">
-            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              width="16"
+              height="16"
               viewBox="0 0 24 24"
               fill="none"
               stroke="currentColor"
@@ -52,32 +250,88 @@
               stroke-linejoin="round"
             >
               <path
-                d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37 1 .608 2.296.07 2.572-1.065"
+                d="M2.062 12.348a1 1 0 0 1 0-.696 10.75 10.75 0 0 1 19.876 0 1 1 0 0 1 0 .696 10.75 10.75 0 0 1-19.876 0"
               />
               <circle cx="12" cy="12" r="3" />
             </svg>
-            Settings
           </button>
         </div>
-      </aside>
 
-      <div class="content-area" id="detailPanel">
-        <div class="welcome-screen" id="welcomeScreen">
-          <h2>Add Cap to your site in 60 seconds</h2>
-          <p class="welcome-sub">Create a sitekey, paste two snippets, you're live.</p>
-          <button type="button" class="welcome-cta" id="welcomeCreateKey">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" width="16" height="16"><path d="M12 5v14M5 12h14" /></svg>
-            Create your first key
-          </button>
-          <p class="welcome-steps"><span>1. Name your key</span><span class="welcome-step-dot">·</span><span>2. Copy the snippets</span><span class="welcome-step-dot">·</span><span>3. Ship</span></p>
-          <a class="welcome-docs" href="https://trycap.dev/guide/" target="_blank" rel="noreferrer">Read the docs →</a>
-        </div>
-
-        <div class="key-detail" id="keyDetail" style="display: none"></div>
-      </div>
+        <button type="submit" class="submit">Continue to Cap</button>
+        <p class="err"></p>
+        <p class="bottom">
+          <a href="https://github.com/tiagozip/cap/issues/new/choose" target="_blank" rel="noopener"
+            >Report issues</a
+          >
+          <a href="https://trycap.dev/" target="_blank" class="poweredby">Powered by Cap</a>
+        </p>
+      </form>
     </div>
-
-    <script src="/assets/chart.js@4.5.0.min.js"></script>
-    <script src="/js/dashboard.js"></script>
   </body>
+  <script>
+    document.querySelector("input").focus();
+
+    document.querySelector("form").addEventListener("submit", async (e) => {
+      e.preventDefault();
+
+      const admin_key = document.querySelector("input[name=password]").value;
+
+      if (!admin_key) {
+        document.querySelector("input[name=password]").focus();
+        return;
+      }
+
+      document.querySelector("button[type=submit]").disabled = true;
+
+      const loginUrl = new URL("api/login", document.baseURI).toString();
+      const { success, session_token, hashed_token, expires } = await (
+        await fetch(loginUrl, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            admin_key,
+          }),
+        })
+      ).json();
+
+      if (success && session_token) {
+        localStorage.setItem(
+          "cap_auth",
+          JSON.stringify({
+            token: session_token,
+            expires,
+            hash: hashed_token,
+          }),
+        );
+
+        document.querySelector("p.err").style.display = "none";
+        window.location.href = "/dashboard.html";
+        return;
+      }
+
+      document.querySelector("button[type=submit]").disabled = false;
+      document.querySelector("p.err").style.display = "block";
+      document.querySelector("p.err").innerText = "Incorrect admin key";
+      document.querySelector("input[name=password]").value = "";
+    });
+
+    document.querySelector(".showhide-password").addEventListener("click", () => {
+      const passwordInput = document.querySelector("input[name=password]");
+      const showhideButton = document.querySelector(".showhide-password");
+      passwordInput.classList.toggle("show-password");
+
+      if (passwordInput.type === "password") {
+        passwordInput.type = "text";
+        passwordInput.placeholder = "correct horse battery staple";
+        showhideButton.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10.733 5.076a10.744 10.744 0 0 1 11.205 6.575 1 1 0 0 1 0 .696 10.747 10.747 0 0 1-1.444 2.49"/><path d="M14.084 14.158a3 3 0 0 1-4.242-4.242"/><path d="M17.479 17.499a10.75 10.75 0 0 1-15.417-5.151 1 1 0 0 1 0-.696 10.75 10.75 0 0 1 4.446-5.143"/><path d="m2 2 20 20"/></svg>`;
+      } else {
+        passwordInput.type = "password";
+        passwordInput.placeholder =
+          "\u2022\u2022\u2022\u2022\u2022\u2022\u2022\u2022\u2022\u2022\u2022\u2022\u2022\u2022\u2022\u2022\u2022\u2022\u2022\u2022\u2022";
+        showhideButton.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2.062 12.348a1 1 0 0 1 0-.696 10.75 10.75 0 0 1 19.876 0 1 1 0 0 1 0 .696 10.75 10.75 0 0 1-19.876 0"/><circle cx="12" cy="12" r="3"/></svg>`;
+      }
+    });
+  </script>
 </html>
