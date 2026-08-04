@@ -1,6 +1,6 @@
 /**
- * 数据库初始化脚本
- * 用法: node netlify/functions/api/_init-db.mjs
+ * 数据库初始化脚本（本地运行，非 serverless function）
+ * 用法: node netlify-deploy/scripts/_init-db.mjs
  *
  * 需要设置环境变量: SUPABASE_DATABASE_URL 或 DATABASE_URL
  */
@@ -26,7 +26,7 @@ const pool = new pg.Pool({
 });
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
-const schema = readFileSync(join(__dirname, "_schema.sql"), "utf8");
+const schema = readFileSync(join(__dirname, "..", "netlify", "functions", "_schema.sql"), "utf8");
 
 console.log("正在初始化 Supabase 数据库...");
 try {

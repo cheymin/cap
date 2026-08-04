@@ -1,14 +1,9 @@
 import pg from "pg";
-import { readFileSync } from "node:fs";
-import { fileURLToPath } from "node:url";
-import { dirname, join } from "node:path";
 
 // 让 JSONB 字段自动解析为 JS 对象（OID 3802）
 pg.types.setTypeParser(3802, (val) => (val === null ? null : JSON.parse(val)));
-// JSON 类型也解析 (OID 114)
 pg.types.setTypeParser(114, (val) => (val === null ? null : JSON.parse(val)));
 
-// Supabase 连接字符串优先，兼容 NETLIFY_DATABASE_URL 和 DATABASE_URL
 const connectionString =
   process.env.SUPABASE_DATABASE_URL ||
   process.env.NETLIFY_DATABASE_URL ||
@@ -21,6 +16,89 @@ const pool = new pg.Pool({
   connectionTimeoutMillis: 10_000,
   ssl: { rejectUnauthorized: false },
 });
+
+// 内联 schema SQL，避免运行时文件路径问题
+const SCHEMA_SQL = `
+CREATE TABLE IF NOT EXISTS keys (
+  site_key TEXT PRIMARY KEY,
+  name TEXT NOT NULL DEFAULT '',
+  secret_hash TEXT NOT NULL,
+  jwt_secret TEXT NOT NULL,
+  config JSONB NOT NULL DEFAULT '{}'::jsonb,
+  created BIGINT NOT NULL
+);
+CREATE TABLE IF NOT EXISTS sessions (
+  token_hash TEXT PRIMARY KEY,
+  data JSONB NOT NULL,
+  expires BIGINT NOT NULL,
+  created BIGINT NOT NULL
+);
+CREATE INDEX IF NOT EXISTS idx_sessions_expires ON sessions(expires);
+CREATE TABLE IF NOT EXISTS api_keys (
+  id TEXT PRIMARY KEY,
+  name TEXT NOT NULL,
+  token_hash TEXT NOT NULL,
+  created BIGINT NOT NULL
+);
+CREATE TABLE IF NOT EXISTS settings (
+  key TEXT PRIMARY KEY,
+  value TEXT NOT NULL
+);
+CREATE TABLE IF NOT EXISTS metrics (
+  id SERIAL PRIMARY KEY,
+  site_key TEXT NOT NULL,
+  metric_type TEXT NOT NULL,
+  bucket BIGINT NOT NULL,
+  count BIGINT NOT NULL DEFAULT 0,
+  UNIQUE(site_key, metric_type, bucket)
+);
+CREATE INDEX IF NOT EXISTS idx_metrics_lookup ON metrics(site_key, metric_type, bucket);
+CREATE TABLE IF NOT EXISTS blocked_ips (
+  id SERIAL PRIMARY KEY,
+  site_key TEXT NOT NULL,
+  rule_key TEXT NOT NULL,
+  expires TEXT NOT NULL DEFAULT '0',
+  UNIQUE(site_key, rule_key)
+);
+CREATE INDEX IF NOT EXISTS idx_blocked_site ON blocked_ips(site_key);
+CREATE TABLE IF NOT EXISTS rate_limits (
+  id SERIAL PRIMARY KEY,
+  scope INTEGER NOT NULL,
+  ip TEXT NOT NULL,
+  window_ms BIGINT NOT NULL,
+  window BIGINT NOT NULL,
+  count BIGINT NOT NULL DEFAULT 1,
+  expires_at TIMESTAMPTZ NOT NULL,
+  UNIQUE(scope, ip, window_ms, window)
+);
+CREATE INDEX IF NOT EXISTS idx_rl_expires ON rate_limits(expires_at);
+CREATE TABLE IF NOT EXISTS tokens (
+  token TEXT PRIMARY KEY,
+  expires BIGINT NOT NULL,
+  expires_at TIMESTAMPTZ NOT NULL
+);
+CREATE INDEX IF NOT EXISTS idx_tokens_expires ON tokens(expires_at);
+CREATE TABLE IF NOT EXISTS nonce_blocklist (
+  sig_hex TEXT PRIMARY KEY,
+  expires_at TIMESTAMPTZ NOT NULL
+);
+CREATE INDEX IF NOT EXISTS idx_nonce_expires ON nonce_blocklist(expires_at);
+CREATE TABLE IF NOT EXISTS rsw_keypair (
+  id INTEGER PRIMARY KEY DEFAULT 1,
+  n TEXT NOT NULL,
+  p TEXT NOT NULL,
+  q TEXT NOT NULL,
+  bits INTEGER NOT NULL,
+  version TEXT NOT NULL,
+  created BIGINT NOT NULL,
+  CONSTRAINT rsw_single_row CHECK (id = 1)
+);
+CREATE TABLE IF NOT EXISTS asset_cache (
+  key TEXT PRIMARY KEY,
+  value TEXT NOT NULL,
+  updated_at BIGINT NOT NULL
+);
+`;
 
 /**
  * 兼容 neon() tagged template 的查询封装器
@@ -63,9 +141,7 @@ let _initPromise = null;
 export async function ensureSchema() {
   if (_initPromise) return _initPromise;
   _initPromise = (async () => {
-    const __dirname = dirname(fileURLToPath(import.meta.url));
-    const schema = readFileSync(join(__dirname, "_schema.sql"), "utf8");
-    await sql(schema);
+    await sql(SCHEMA_SQL);
   })();
   return _initPromise;
 }

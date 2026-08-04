@@ -1,10 +1,11 @@
 [build]
-  publish = "public"
-  functions = "netlify/functions"
+  publish = "netlify-deploy/public"
+  functions = "netlify-deploy/netlify/functions"
+  command = "npm install"
 
 [functions]
   node_bundler = "esbuild"
-  included_files = ["public/**/*", "netlify/functions/_schema.sql"]
+  included_files = ["netlify-deploy/netlify/functions/_schema.sql"]
 
 # 所有 API 请求转发到 serverless function
 [[redirects]]
