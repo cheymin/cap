@@ -1,19 +1,25 @@
 import pg from "pg";
 
-// 让 JSONB 字段自动解析为 JS 对象（OID 3802）
+// JSONB/JSON 自动解析
 pg.types.setTypeParser(3802, (val) => (val === null ? null : JSON.parse(val)));
 pg.types.setTypeParser(114, (val) => (val === null ? null : JSON.parse(val)));
 
-const connectionString =
+let connectionString =
   process.env.SUPABASE_DATABASE_URL ||
   process.env.NETLIFY_DATABASE_URL ||
   process.env.DATABASE_URL;
 
+// Supabase: serverless 必须用连接池模式（端口 6543 / Supavisor）
+// 如果连接字符串用的是直连端口 5432，自动切换到 6543
+if (connectionString && connectionString.includes(":5432")) {
+  connectionString = connectionString.replace(":5432", ":6543");
+}
+
 const pool = new pg.Pool({
   connectionString,
-  max: 10,
-  idleTimeoutMillis: 20_000,
-  connectionTimeoutMillis: 10_000,
+  max: 1,
+  idleTimeoutMillis: 10_000,
+  connectionTimeoutMillis: 8_000,
   ssl: { rejectUnauthorized: false },
 });
 
