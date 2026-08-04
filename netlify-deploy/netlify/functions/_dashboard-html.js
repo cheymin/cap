@@ -1,4 +1,8 @@
-<!doctype html>
+// dashboard.html 内容内联为字符串
+// 这样 esbuild 会将其打包进 function bundle，运行时无需读取文件系统
+// 同时 dashboard.html 不在 publish 目录中，无法被直接静态访问
+
+export const DASHBOARD_HTML = `<!doctype html>
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
@@ -80,4 +84,4 @@
     <script src="/assets/chart.js@4.5.0.min.js"></script>
     <script src="/js/dashboard.js"></script>
   </body>
-</html>
+</html>`;

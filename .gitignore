@@ -99,3 +99,5 @@ standalone/public/tester.html
 standalone/data/
 trycap
 .claude
+# Local Netlify folder
+.netlify

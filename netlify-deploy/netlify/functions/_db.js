@@ -140,16 +140,27 @@ function sql(parts, ...values) {
 
 let _initPromise = null;
 
+let _schemaReady = false;
+
 /**
  * 初始化数据库表结构（幂等）
- * 在第一次请求时自动执行
+ * 非阻塞：立即返回，后台执行
  */
-export async function ensureSchema() {
-  if (_initPromise) return _initPromise;
+export function ensureSchema() {
+  if (_initPromise || _schemaReady) return;
   _initPromise = (async () => {
-    await sql(SCHEMA_SQL);
+    try {
+      // 逐条执行，避免多语句超时
+      const statements = SCHEMA_SQL.split(";").map(s => s.trim()).filter(Boolean);
+      for (const stmt of statements) {
+        await pool.query(stmt);
+      }
+      _schemaReady = true;
+    } catch (e) {
+      console.error("[db] schema init error:", e.message);
+      _initPromise = null; // 允许重试
+    }
   })();
-  return _initPromise;
 }
 
 // ==================== KV 设置存储 ====================

@@ -5,7 +5,14 @@
 
 [functions]
   node_bundler = "esbuild"
-  included_files = ["netlify-deploy/netlify/functions/_schema.sql"]
+
+# dashboard.html 不在 publish 目录中（防止静态直访越权）
+# 所有 /dashboard.html 请求强制走 function，由 function 检查 cookie 决定放行或跳转
+[[redirects]]
+  from = "/dashboard.html"
+  to = "/.netlify/functions/api/dashboard.html"
+  status = 200
+  force = true
 
 # 所有 API 请求转发到 serverless function
 [[redirects]]
