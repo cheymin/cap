@@ -12,6 +12,12 @@ enabled = true
 directory = "cloudflare-deploy/public"
 binding = "ASSETS"
 
+# D1 数据库绑定（代码里用 env.DB）
+[[d1_databases]]
+binding = "DB"
+database_name = "min"
+database_id = "166006eb-3831-4ab9-8974-9f3bef40f261"
+
 # ============================================================
 # D1 数据库 / ADMIN_KEY 请在 Cloudflare 仪表盘配置（不用改本文件）
 # ============================================================
