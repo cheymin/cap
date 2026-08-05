@@ -1,11 +1,20 @@
 {
-  "name": "cap-netlify-root",
+  "name": "cap-root",
   "version": "1.0.0",
+  "private": true,
   "type": "module",
+  "scripts": {
+    "build": "echo 'no build step needed'",
+    "deploy": "npx wrangler deploy",
+    "dev": "cd cloudflare-deploy && npx wrangler dev",
+    "cf-typegen": "cd cloudflare-deploy && npx wrangler types"
+  },
   "dependencies": {
-    "bcryptjs": "^2.4.3",
+    "@cap.js/server": "^3.0.0",
     "capjs-core": "^0.1.1",
-    "hono": "^4.6.0",
-    "pg": "^8.13.0"
+    "hono": "^4.6.0"
+  },
+  "devDependencies": {
+    "wrangler": "^4.0.0"
   }
 }

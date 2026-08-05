@@ -1,5 +1,5 @@
 name = "cap"
-main = "src/index.js"
+main = "cloudflare-deploy/src/index.js"
 compatibility_date = "2024-12-05"
 compatibility_flags = ["nodejs_compat"]
 
@@ -9,7 +9,7 @@ enabled = true
 # 静态资源（登录页、dashboard JS、CSS、字体等）
 # dashboard.html 不在此目录中，由 Worker 鉴权后返回
 [assets]
-directory = "./public"
+directory = "cloudflare-deploy/public"
 binding = "ASSETS"
 
 # ============================================================
@@ -29,16 +29,3 @@ binding = "ASSETS"
 #
 # 保存后会自动触发重新部署，即可正常使用。
 # 数据库表会在首次登录时由 Worker 自动创建（ensureSchema），无需手动执行 SQL。
-#
-# ---- 本地开发用（部署时请忽略以下注释段）----
-# 如需本地 `wrangler dev`，先 `npx wrangler d1 create cap-db` 取得 database_id，
-# 再取消下面注释并填入：
-#
-# [[d1_databases]]
-# binding = "DB"
-# database_name = "cap-db"
-# database_id = "<填入 wrangler d1 create 输出的 id>"
-#
-# [vars]
-# ADMIN_KEY = "change-me-please-12chars"
-# DEMO_MODE = "false"
