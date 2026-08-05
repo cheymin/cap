@@ -1,0 +1,21 @@
+{
+  "name": "cap-cloudflare",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "wrangler dev",
+    "deploy": "wrangler deploy",
+    "setup-db": "wrangler d1 execute cap-db --remote --file=./src/schema.sql",
+    "setup-db:local": "wrangler d1 execute cap-db --local --file=./src/schema.sql",
+    "cf-typegen": "wrangler types"
+  },
+  "dependencies": {
+    "@cap.js/server": "^3.0.0",
+    "capjs-core": "^0.1.1",
+    "hono": "^4.6.0"
+  },
+  "devDependencies": {
+    "wrangler": "^4.0.0"
+  }
+}

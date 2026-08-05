@@ -101,3 +101,5 @@ trycap
 .claude
 # Local Netlify folder
 .netlify
+# Cloudflare Wrangler local state
+.wrangler
