@@ -4,11 +4,11 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "dev": "wrangler dev",
-    "deploy": "wrangler deploy",
-    "setup-db": "wrangler d1 execute cap-db --remote --file=./src/schema.sql",
-    "setup-db:local": "wrangler d1 execute cap-db --local --file=./src/schema.sql",
-    "cf-typegen": "wrangler types"
+    "dev": "cd .. && npx wrangler dev",
+    "deploy": "cd .. && npx wrangler deploy",
+    "setup-db": "cd .. && npx wrangler d1 execute cap-db --remote --file=cloudflare-deploy/src/schema.sql",
+    "setup-db:local": "cd .. && npx wrangler d1 execute cap-db --local --file=cloudflare-deploy/src/schema.sql",
+    "cf-typegen": "cd .. && npx wrangler types"
   },
   "dependencies": {
     "@cap.js/server": "^3.0.0",
