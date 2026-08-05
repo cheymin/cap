@@ -12,15 +12,33 @@ enabled = true
 directory = "./public"
 binding = "ASSETS"
 
-# D1 数据库：sitekey / session / metrics / settings 等
-[[d1_databases]]
-binding = "DB"
-database_name = "cap-db"
-database_id = "REPLACE_WITH_YOUR_D1_ID"
-
-# 环境变量（非敏感）
-[vars]
-# 管理员密钥（≥12 字符）。部署后请用 `wrangler secret put ADMIN_KEY` 覆盖为真实值
-ADMIN_KEY = "change-me-please-12chars"
-# 演示模式：true 时任意密码可登录（仅用于公开演示）
-DEMO_MODE = "false"
+# ============================================================
+# D1 数据库 / ADMIN_KEY 请在 Cloudflare 仪表盘配置（不用改本文件）
+# ============================================================
+# 部署后进入 Worker 的 Settings → Variables and Bindings：
+#
+#   1) Bindings → Add binding → D1 database
+#        Variable name:  DB          ← 必须是 DB（代码里用 env.DB）
+#        D1 database:    新建 cap-db 或选择已有的
+#
+#   2) Variables → Add variable
+#        ADMIN_KEY  =  你的管理员密钥（≥12 字符，建议随机字符串）
+#
+#   3) （可选）Variables → Add variable
+#        DEMO_MODE  =  true          ← 公开演示时用，任意密码可登录
+#
+# 保存后会自动触发重新部署，即可正常使用。
+# 数据库表会在首次登录时由 Worker 自动创建（ensureSchema），无需手动执行 SQL。
+#
+# ---- 本地开发用（部署时请忽略以下注释段）----
+# 如需本地 `wrangler dev`，先 `npx wrangler d1 create cap-db` 取得 database_id，
+# 再取消下面注释并填入：
+#
+# [[d1_databases]]
+# binding = "DB"
+# database_name = "cap-db"
+# database_id = "<填入 wrangler d1 create 输出的 id>"
+#
+# [vars]
+# ADMIN_KEY = "change-me-please-12chars"
+# DEMO_MODE = "false"

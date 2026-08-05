@@ -5,7 +5,7 @@ import { Hono } from "hono";
 
 import { setD1Binding, ensureSchema, cleanupExpired } from "./_db.js";
 import { loadAllSettings } from "./_settings.js";
-import { handleLogin, validateAdminKey, isDemoMode, initAuth } from "./_auth.js";
+import { handleLogin, isDemoMode, initAuth } from "./_auth.js";
 import { capApp } from "./_cap.js";
 import { serverApp } from "./_server.js";
 import { siteverifyApp } from "./_siteverify.js";
@@ -74,13 +74,8 @@ export default {
     setD1Binding(env.DB);
     initAuth(env);
 
-    try {
-      validateAdminKey();
-    } catch (e) {
-      console.error("[startup]", e.message);
-    }
-
     // schema 与设置初始化不阻塞请求（login 内部会 await ensureSchema）
+    // 未配置 D1 时 ensureSchema 会静默失败，登录时会返回 503 友好提示
     ensureSchema();
     loadAllSettings().catch(() => {});
 

@@ -9,13 +9,20 @@ let _demoMode = false;
 
 /**
  * 初始化（由 Worker 入口注入环境变量）
+ * 每个请求都会调用，因此配置警告只输出一次，避免日志噪音
  */
+let _warnedMissingKey = false;
 export function initAuth(env) {
   _adminKey = env.ADMIN_KEY || null;
   _demoMode = env.DEMO_MODE === "true";
-  if (!_demoMode) {
-    if (!_adminKey) console.error("auth: ADMIN_KEY 环境变量未设置");
-    else if (_adminKey.length < 12) console.error("auth: ADMIN_KEY 至少需要 12 个字符");
+  if (!_demoMode && !_warnedMissingKey) {
+    if (!_adminKey) {
+      console.warn("[auth] ADMIN_KEY 未配置 —— 请在 Cloudflare 仪表盘 Settings → Variables 添加");
+      _warnedMissingKey = true;
+    } else if (_adminKey.length < 12) {
+      console.warn("[auth] ADMIN_KEY 至少需要 12 字符");
+      _warnedMissingKey = true;
+    }
   }
 }
 
@@ -47,8 +54,10 @@ export async function handleLogin(c) {
   }
 
   if (!_adminKey) {
-    console.error("[login] ADMIN_KEY 环境变量未设置");
-    return c.json({ success: false, error: "Server misconfigured" }, 500);
+    return c.json(
+      { success: false, error: "Server not configured: 请在 Cloudflare 仪表盘设置 ADMIN_KEY 变量" },
+      503,
+    );
   }
 
   if (!admin_key || typeof admin_key !== "string") {
