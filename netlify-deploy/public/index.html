@@ -284,8 +284,9 @@
       document.querySelector("button[type=submit]").disabled = true;
 
       const loginUrl = new URL("api/login", document.baseURI).toString();
-      const { success, session_token, hashed_token, expires } = await (
-        await fetch(loginUrl, {
+      let resp;
+      try {
+        resp = await fetch(loginUrl, {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
@@ -293,8 +294,16 @@
           body: JSON.stringify({
             admin_key,
           }),
-        })
-      ).json();
+        });
+      } catch (e) {
+        document.querySelector("button[type=submit]").disabled = false;
+        document.querySelector("p.err").style.display = "block";
+        document.querySelector("p.err").innerText = "Network error";
+        return;
+      }
+
+      const data = await resp.json().catch(() => ({}));
+      const { success, session_token, hashed_token, expires, error } = data;
 
       if (success && session_token) {
         localStorage.setItem(
@@ -313,7 +322,7 @@
 
       document.querySelector("button[type=submit]").disabled = false;
       document.querySelector("p.err").style.display = "block";
-      document.querySelector("p.err").innerText = "Incorrect admin key";
+      document.querySelector("p.err").innerText = error || "Incorrect admin key";
       document.querySelector("input[name=password]").value = "";
     });
 

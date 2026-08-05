@@ -144,23 +144,27 @@ let _schemaReady = false;
 
 /**
  * 初始化数据库表结构（幂等）
- * 非阻塞：立即返回，后台执行
+ * 返回 promise，可被 await；多次调用安全
  */
 export function ensureSchema() {
-  if (_initPromise || _schemaReady) return;
-  _initPromise = (async () => {
-    try {
-      // 逐条执行，避免多语句超时
-      const statements = SCHEMA_SQL.split(";").map(s => s.trim()).filter(Boolean);
-      for (const stmt of statements) {
-        await pool.query(stmt);
+  if (_schemaReady) return Promise.resolve();
+  if (!_initPromise) {
+    _initPromise = (async () => {
+      try {
+        // 逐条执行，避免多语句超时
+        const statements = SCHEMA_SQL.split(";").map(s => s.trim()).filter(Boolean);
+        for (const stmt of statements) {
+          await pool.query(stmt);
+        }
+        _schemaReady = true;
+      } catch (e) {
+        console.error("[db] schema init error:", e.message);
+        _initPromise = null; // 允许重试
+        throw e;
       }
-      _schemaReady = true;
-    } catch (e) {
-      console.error("[db] schema init error:", e.message);
-      _initPromise = null; // 允许重试
-    }
-  })();
+    })();
+  }
+  return _initPromise;
 }
 
 // ==================== KV 设置存储 ====================

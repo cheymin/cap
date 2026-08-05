@@ -1,5 +1,5 @@
 import crypto from "node:crypto";
-import { createSession, deleteSession, getSession, getApiKeyTokenHash, getAllSessions } from "./_db.js";
+import { ensureSchema, createSession, deleteSession, getSession, getApiKeyTokenHash, getAllSessions } from "./_db.js";
 import { hashPassword, verifyPassword, randomBytesHex } from "./_crypto.js";
 
 const { ADMIN_KEY, DEMO_MODE } = process.env;
@@ -19,8 +19,27 @@ export function isDemoMode() {
  * 登录路由处理
  */
 export async function handleLogin(c) {
-  const body = await c.req.json();
-  const { admin_key } = body;
+  let body;
+  try {
+    body = await c.req.json();
+  } catch {
+    return c.json({ success: false, error: "Invalid request body" }, 400);
+  }
+  const { admin_key } = body || {};
+
+  // 演示模式：任意密码直接放行
+  if (isDemoMode()) {
+    return _issueSession(c);
+  }
+
+  if (!ADMIN_KEY) {
+    console.error("[login] ADMIN_KEY 环境变量未设置");
+    return c.json({ success: false, error: "Server misconfigured" }, 500);
+  }
+
+  if (!admin_key || typeof admin_key !== "string") {
+    return c.json({ success: false, error: "Admin key required" }, 400);
+  }
 
   const hash = (v) => crypto.createHash("sha256").update(v).digest();
   const adminHash = hash(ADMIN_KEY);
@@ -30,27 +49,46 @@ export async function handleLogin(c) {
     adminHash.length !== inputHash.length ||
     !crypto.timingSafeEqual(adminHash, inputHash)
   ) {
-    return c.json({ success: false }, 401);
+    return c.json({ success: false, error: "Incorrect admin key" }, 401);
   }
 
-  const sessionToken = randomBytesHex(30);
-  const expires = Date.now() + 30 * 24 * 60 * 60 * 1000; // 30 天
-  const created = Date.now();
+  // 密码正确，确保 schema 已就绪后再写 session
+  try {
+    await ensureSchema();
+  } catch (e) {
+    console.error("[login] schema 初始化失败:", e.message);
+    return c.json({ success: false, error: "Database unavailable" }, 503);
+  }
 
-  const hashedToken = await hashPassword(sessionToken);
-  const ttlSeconds = Math.ceil((expires - Date.now()) / 1000);
+  return await _issueSession(c);
+}
 
-  await createSession(hashedToken, { created, expires }, expires, created);
+/**
+ * 签发会话并设置 cookie
+ */
+async function _issueSession(c) {
+  try {
+    const sessionToken = randomBytesHex(30);
+    const expires = Date.now() + 30 * 24 * 60 * 60 * 1000; // 30 天
+    const created = Date.now();
 
-  // 设置 cookie
-  c.header("Set-Cookie", `cap_authed=yes; Path=/; Expires=${new Date(expires).toUTCString()}; HttpOnly; SameSite=Lax`);
+    const hashedToken = await hashPassword(sessionToken);
 
-  return c.json({
-    success: true,
-    session_token: sessionToken,
-    hashed_token: hashedToken,
-    expires,
-  });
+    await createSession(hashedToken, { created, expires }, expires, created);
+
+    // 设置 cookie
+    c.header("Set-Cookie", `cap_authed=yes; Path=/; Expires=${new Date(expires).toUTCString()}; HttpOnly; SameSite=Lax`);
+
+    return c.json({
+      success: true,
+      session_token: sessionToken,
+      hashed_token: hashedToken,
+      expires,
+    });
+  } catch (e) {
+    console.error("[login] 签发会话失败:", e.message, e.stack);
+    return c.json({ success: false, error: "Failed to create session" }, 500);
+  }
 }
 
 /**
