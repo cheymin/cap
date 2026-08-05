@@ -6,10 +6,13 @@ import { verifyPassword } from "./_crypto.js";
 export const siteverifyApp = new Hono();
 
 /**
- * POST /api/v0/siteverify
  * 验证 Cap token 是否有效（一次性消费）
+ * 挂载路径（见下方注册）：
+ *   POST /:siteKey/siteverify   （标准 Cap）
+ *   POST /siteverify            （标准 Cap，siteKey 从 token 推导）
+ *   POST /api/v0/siteverify     （reCAPTCHA 兼容）
  */
-siteverifyApp.post("/", async (c) => {
+const siteverifyHandler = async (c) => {
   let secret, token;
 
   const ct = c.req.header("content-type") || "";
@@ -64,4 +67,8 @@ siteverifyApp.post("/", async (c) => {
   }
 
   return c.json({ success: true, expires: Number(expires) });
-});
+};
+
+siteverifyApp.post("/siteverify", siteverifyHandler);
+siteverifyApp.post("/:siteKey/siteverify", siteverifyHandler);
+siteverifyApp.post("/api/v0/siteverify", siteverifyHandler);

@@ -38,11 +38,17 @@ app.post("/api/login", handleLogin);
 // 健康检查（无需鉴权，必须在 serverApp 挂载前注册以避免被 authMiddleware 拦截）
 app.get("/api/health", (c) => c.json({ ok: true, ts: Date.now() }));
 
-// CAPTCHA 挑战与验证: /api/:siteKey/challenge, /api/:siteKey/redeem
+// CAPTCHA 挑战与验证
+// 标准 Cap 约定（无前缀）: /:siteKey/challenge, /:siteKey/redeem
+// 同时保留 /api 前缀以兼容旧集成
+app.route("/", capApp);
 app.route("/api", capApp);
 
-// siteverify: /api/v0/siteverify
-app.route("/api/v0/siteverify", siteverifyApp);
+// siteverify:
+//   /:siteKey/siteverify + /siteverify（标准 Cap 约定）
+//   /api/v0/siteverify（reCAPTCHA 兼容）
+app.route("/", siteverifyApp);
+app.route("/api", siteverifyApp);
 
 // 管理面板 API（内部含 authMiddleware）
 app.route("/api", serverApp);
